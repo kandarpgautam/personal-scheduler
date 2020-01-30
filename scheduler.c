@@ -12,10 +12,10 @@ struct
   char message[2000];
   char cdate[30];
   char duedate[30];
-}note[100];
-int usercount;
-int currentuser;
-int notecount;
+}note[100]; 
+int usercount; //total users
+int currentuser; // logged in user
+int notecount; //total notes
 static int login_status=0;
 void login();
 void signup();
@@ -26,6 +26,7 @@ void saveNote();
 void showcal();
 void viewNote();
 void addNote();
+void editNote();
 void delNote();
 
 void main()
@@ -68,7 +69,8 @@ void main()
     1. View all notes\n\
     2. View first N notes\n\
     3. Add note\n\
-    4. Delete note\n\
+    4. Edit note\n\
+    5. Delete note\n\
     **************\n");
     scanf("%d",&choice);
     switch(choice)
@@ -84,7 +86,10 @@ void main()
       case 3://add note
         addNote();
         break;
-      case 4://delete note
+      case 4: //edit note
+        editNote();
+        break;
+      case 5://delete note
         delNote();
         break;
       default:
@@ -259,6 +264,11 @@ void viewNote(int n)
 }
 void addNote()
 {
+  if(notecount>=100)
+  {
+    printf("no space left. delete old notes to add more.\n");
+    return;
+  }
   showcal("cal -A 2");
   time_t curtime;
   time(&curtime); //set time object
@@ -276,6 +286,35 @@ void addNote()
   scanf("%[^\n]%*c",&note[notecount].duedate);
   printf("note has been added.\n");
   notecount++;
+}
+void editNote()
+{
+  int notenum;
+  time_t curtime;
+  printf("enter note number:");
+  scanf("%d",&notenum);
+  if(notenum==0)
+    return;
+  if(notenum>notecount)
+  {
+    printf("invalid note number.\n");
+    return;
+  }
+  notenum--; // to get index of note.
+  time(&curtime); //set time object
+  strcpy(note[notenum].cdate,ctime(&curtime)); //store current date
+  for(int i=0,j=0;note[notenum].cdate[i]!='\0';i++,j++)
+  {
+    if(note[notenum].cdate[j]=='\n')
+      j++;
+    note[notenum].cdate[i]=note[notenum].cdate[j];
+  }
+  while(getchar()!='\n'); //clearing inputstream
+  printf("enter note:");
+  scanf("%[^\n]%*c",&note[notenum].message);
+  printf("enter due date:");
+  scanf("%[^\n]%*c",&note[notenum].duedate);
+  printf("note has been updated.\n");
 }
 void delNote()
 {
